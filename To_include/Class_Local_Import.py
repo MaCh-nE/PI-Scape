@@ -18,6 +18,8 @@ class Wave :
         self.fin = fin
         self.length = length
 
+        self.head = (self.fin , (self.h) + self.amp*(np.sin(self.freq*self.fin)))
+
     ## Wave updater : -pix_rate pixels from start to finish :
     def sin_update(self, pix_rate, s0) :
         if self.fin > (s0 - self.length) :
@@ -27,6 +29,7 @@ class Wave :
                 self.fin-= pix_rate
             if self.deb > 0 :
                 self.deb-= pix_rate
+        self.head = (self.fin , (self.h) + self.amp*(np.sin(self.freq*self.fin)))
 
     ## Random param generator :
     @classmethod
@@ -41,6 +44,9 @@ class Wave :
     def support(self) :
         X = np.linspace(self.fin,self.deb,int(abs(self.deb - self.fin)/4))
         return [(x , (self.h) + self.amp*(np.sin(self.freq*x))) for x in X]
+
+    def getheadRect(self, support) :
+        return pg.Rect((self.head[0] - 10, self.head[1] - 10), (20, 20)) 
 
 # -------------------------------------------------------------------------------------------------------------------------------------#
 # -------------------------------------------------------------------------------------------------------------------------------------#
@@ -67,6 +73,8 @@ class SpriteSheet(pg.sprite.Sprite) :
         self.coord = [x,y]
         self.x = self.coord[0]
         self.rect.center = self.coord
+
+        self.hitBox = self.rect.copy()
 
     ## Frame by Frame method into the frames list :
     def getframes(self) :
@@ -101,6 +109,7 @@ class SpriteSheet(pg.sprite.Sprite) :
                                            sign,
                                            self.coord[0],
                                            self.coord[1])]
+        self.hitBox.center = self.rect.center
         self.x = self.x + sign*pace
 
     def reset(self) :
@@ -120,16 +129,10 @@ class SpriteSheet(pg.sprite.Sprite) :
 
             self.image = self.frames[int(self.current)]
 
-            if switch_pos == True :
-                self.rect.center = [self.coord[0],
-                                    self.coord[1] + PI_Trajectory(self.coord[0],
-                                                                  self.eps, 
-                                                                  1,
-                                                                  self.coord[0],
-                                                                  self.coord[1])]
-                
-                if self.currentcoord < 10000 - 1 :
-                    self.currentcoord+= 1
+
+    ## ONLY FOR THE MAIN SPRITE 
+    def getmainhitBox(self) :
+        return pg.Rect((self.hitBox.topleft[0] + 10, self.hitBox.topleft[1] + 23), (90, 85))
 
     
 

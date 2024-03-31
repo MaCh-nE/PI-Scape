@@ -37,7 +37,7 @@ colors = {
 # -------------------------------------------------------------------------------------------------------------------------------------#
 # -------------------------------------------------------------------------------------------------------------------------------------#
 
-# Key Locks dictionnary :
+# Key Locks dict. :
 keylocks = {
     pg.K_UP : False,
     pg.K_DOWN : False,
@@ -132,6 +132,7 @@ board_swipe = largeSprite(size[0],
 
 # Waves object list (default Wave constructor) (initialized with 1 wave at 1st) :
 waves = [Wave(*Wave.params_gen(size[0], size[1]))]
+waveHeads = []
 
 # Technical block :
 # jumpWay flag indicating wich arrow the jump follows (1: Clockwise / -1: Anti-Clockwise)
@@ -286,7 +287,7 @@ while run :
         sprites.draw(screen)
            
         # Main Sprite Rectangle for HIT-BOX adjustements : 
-        # pg.draw.rect(screen, colors["GREEN"], main_PI_sprite.rect, width=2)
+        pg.draw.rect(screen, colors["GREEN"], main_PI_sprite.getmainhitBox(), width=2)
         # pg.draw.rect(screen, colors["GREEN"], UPDRAFT_sprite.rect, width=2)
         sprites.update(2, False)
 
@@ -294,12 +295,17 @@ while run :
 
         # Random new wave f screen (proportional to game diff further) :
         if RND.randint(1,500) == 5 :
-            waves.append(Wave(*Wave.params_gen(size[0], size[1])))
+            wv = Wave(*Wave.params_gen(size[0], size[1]))
+            waves.append(wv)
+            waveHeads.append(wv.getheadRect(wv.support()))
 
         for wave in waves :
+            supp = wave.support()
             if wave.fin>0 or wave.deb>0 :
-                for center in wave.support() :
+                for center in supp :   
                     pg.draw.circle(screen,colors["WHITE"],center,RND.uniform(3,15),2)
+                pg.draw.rect(screen, colors["GREEN"], wave.getheadRect(supp), width=2)
+                waveHeads.append(wave.getheadRect(supp))
             else :
                 score+= 10
                 scoreboard.press()
@@ -307,6 +313,18 @@ while run :
                 continue
             
             wave.sin_update(5, size[0])
+
+        ## WaveHeads collision check :
+        for heads in waveHeads :
+            if main_PI_sprite.getmainhitBox().colliderect(heads) :
+                waves = [Wave(*Wave.params_gen(size[0], size[1]))]
+                score = 0
+                
+                keylocks[pg.MOUSEBUTTONDOWN] = False
+                keylocks[pg.MOUSEBUTTONUP] = False
+                wlc = 3
+
+        waveHeads = []
 
         ## Scoreboard management :
         if scoreboard.pressed == True :
