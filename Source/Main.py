@@ -223,7 +223,7 @@ while run :
     # Welcome wipe :
     elif wlc == 2 :
         if board_swipe.frame < board_swipe.total :
-            board_swipe.draw(screen, 0.8, 1)
+            board_swipe.draw(screen, 0.9, 1)
         else :
             board_swipe.frameLock()
             wlc = 4
