@@ -1,15 +1,18 @@
 from PIL import Image
 
 # List of image paths
-frames = 33
+frames = 12 + 63
 image_paths = []
 
 ## Cross-Sprite framing
-for i in range(0,frames) :
+for j in range(1, frames - 63 + 1) :
+    image_paths.append("Assets\\Characters\\Pi\\Digitalized_PI\\Main\\mainPI_" + str(j) + ".png")
+
+for i in range(0, frames - 12) :
     if i < 10 :
-        image_paths.append("Assets\\Characters\\Pi\\Digitalized_PI\\Digit_PI_Rotation\\Frame_0" + str(i) + ".png")
+        image_paths.append("Assets\\Characters\\Pi\\Digitalized_PI\\Digit_PI_Rotation\\SpriteSheet\\PI_0" + str(i) + ".png")
     else :
-        image_paths.append("Assets\\Characters\\Pi\\Digitalized_PI\\Digit_PI_Rotation\\Frame_" + str(i) + ".png")
+        image_paths.append("Assets\\Characters\\Pi\\Digitalized_PI\\Digit_PI_Rotation\\SpriteSheet\\PI_" + str(i) + ".png")
         
 
 # Open all images and get their sizes
