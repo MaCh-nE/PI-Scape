@@ -74,7 +74,7 @@ class SpriteSheet(pg.sprite.Sprite) :
         self.x = self.coord[0]
         self.rect.center = self.coord
 
-        self.hitBox = self.rect.copy()
+        self.hitBox = self.rect
 
     ## Frame by Frame method into the frames list :
     def getframes(self) :
@@ -194,3 +194,78 @@ class largeSprite :
     
     def frameLock(self) :
         self.frame = self.total - 1
+
+    def checkFinish(self) :
+        return int(self.frame) >= self.total + self.fstIndex - 1
+    
+class movingSprite :
+    def __init__(self, screenSize, width, height, total, fstIndex, folderPath, extension) :
+        self.size = (width, height)
+        self.screenSize = screenSize
+        self.path = folderPath
+        self.ext = extension
+        self.total = total
+        self.fstIndex = fstIndex
+        self.frame = fstIndex
+        self.coord = [screenSize[0],
+                      RND.uniform(3/10,3/5)*screenSize[1]]
+        self.rect = pg.transform.scale(pg.image.load(self.path + str(int(self.frame)) + self.ext), self.size).get_rect()
+        self.rect.center = self.coord
+
+        self.shakeY = 1
+    
+    def move_n_draw(self, surface, transformPace, movePace, shakeCoeff, sign) :
+        if int(self.frame) >= self.total + self.fstIndex - 1 :
+            self.frame = self.fstIndex
+        surface.blit(pg.transform.scale(pg.image.load(self.path + str(int(self.frame)) + self.ext), self.size), topleft_center(self.coord, self.size))
+        self.frame = self.frame + sign*transformPace
+        self.coord = [self.coord[0] - sign*movePace, self.coord[1] + self.shakeY*shakeCoeff]
+        self.rect.center = self.coord
+        self.shakeY = self.shakeY*(-1)
+        
+    def reset(self):
+        self.coord = [self.screenSize[0],
+                      RND.uniform(2/10,9/10)*self.screenSize[1]]
+        self.frame = self.fstIndex
+        self.rect.center = self.coord
+
+    def finished(self):
+        return self.rect.right <= 0
+    
+# -------------------------------------------------------------------------------------------------------------------------------------#
+# -------------------------------------------------------------------------------------------------------------------------------------#
+
+## Altered Sprite Group Class (for the PI's vertical teleport effect)
+class customSpriteGroup(pg.sprite.Group):
+    def __init__(self, screenSize) :
+        super().__init__()
+        self.screenWidth = screenSize[0]
+        self.screenHeight = screenSize[1]
+
+    def draw(self, surface):
+        for sprite in self.sprites():
+            self.draw_wrapped_sprite(sprite, surface)
+
+    def draw_wrapped_sprite(self, sprite, surface):
+        surface.blit(sprite.image, sprite.rect)
+        
+
+        ## Frame rendering
+        if sprite.rect.bottom > self.screenHeight:
+            surface.blit(sprite.image, (sprite.rect.x, sprite.rect.bottom - self.screenHeight))
+        elif sprite.rect.top < 0:
+            surface.blit(sprite.image, (sprite.rect.x, sprite.rect.top + self.screenHeight))
+
+        ## Actual HitBox re-orienting (Rect moving, to not duplicate entities after teleport)      
+        if sprite.rect.top > self.screenHeight:
+            sprite.rect.top-= self.screenHeight
+        elif sprite.rect.bottom < 0:
+            sprite.rect.bottom+= self.screenHeight
+
+    ## Screen Width Offset check, done apart fom the draw method due to hierarchia lcall (the PI's jump method is called BEFORE the draw())
+    def widthOffsetCheck(self) :
+        for sprite in self.sprites():
+            if sprite.rect.left < 0 :
+                sprite.rect.left = 0
+            elif sprite.rect.right >= self.screenWidth :
+                sprite.rect.right = self.screenWidth

@@ -5,7 +5,7 @@ import sys
 from time import sleep
 
 ## Parent directory 
-sys.path.append("C:\\PI-Scape\\")
+sys.path.append("F:\\PI-Scape\\")
 # -------------------------------------------------------------------------------------------------------------------------------------#
 # -------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -102,7 +102,7 @@ scoreSurfaces = [[pg.transform.scale(pg.image.load("Assets\\Scoreboard\\Score bi
 # -------------------------------------------------------------------------------------------------------------------------------------#
 # -------------------------------------------------------------------------------------------------------------------------------------#
 
-sprites = pg.sprite.Group()
+sprites = customSpriteGroup(size)
 intro_PI_sprite = SpriteSheet(pg.image.load("Assets\\Characters\\Pi\\Intro_PI\\Intro_Sprite(503 x 496).png"),
                      75,
                      93,
@@ -129,14 +129,31 @@ board_swipe = largeSprite(size[0],
                           "Assets\\Background\\Swipe_Sprite\\Swipe_Sprite (",
                           ").png")
 
+intro_trigCircle = largeSprite(size[0],
+                               size[1],
+                               (0,0),
+                               54,
+                               0,
+                               "Assets\\Alerts\\TrigCircle\\In-Sprite\\Frame_",
+                               ".png")
+
+trigCircle, trigFlag, trigDifficulty = movingSprite(size,
+                                              665,
+                                              487,
+                                              6,
+                                              1,
+                                              "Assets\\Characters\\TrigCircle\\Main_Sprite\\Frame_",
+                                              ".png"), False, 700
 
 # Waves object list (default Wave constructor) (initialized with 1 wave at 1st) :
-waves = [Wave(*Wave.params_gen(size[0], size[1]))]
+waves, waveDifficulty = [Wave(*Wave.params_gen(size[0], size[1]))], 400
 waveHeads = []
 
+# Score :
+score = 0
 # Technical block :
 # jumpWay flag indicating wich arrow the jump follows (1: Clockwise / -1: Anti-Clockwise)
-# run flag / Game status  (1: Welcome state / 2: Game wipe / 3: Game reset wipe / 4: Game start animation / 5: Game loop)
+# run flag / Game status  (1: Welcome state / 2: Game wipe / 3: Game reset wipe / 4: Game start animation / 5: Game loop / 6<=: Bosses)
 jumpWay = 1
 run, wlc = True, 1
 clock, FPS = pg.time.Clock(), 60
@@ -188,6 +205,7 @@ while run :
                 keylocks[pg.MOUSEBUTTONDOWN] = False
                 keylocks[pg.MOUSEBUTTONUP] = False
                 wlc = 3
+                    
 
         if event.type == pg.MOUSEBUTTONDOWN or event.type == pg.MOUSEBUTTONUP:
             if keylocks[pg.MOUSEBUTTONDOWN] == False and keylocks[pg.MOUSEBUTTONUP] == False :
@@ -263,6 +281,7 @@ while run :
                             464,
                             0.3,
                             63)
+
                     sprites.add(main_PI_sprite)
 
                     UPDRAFT_sprite = SpriteSheet(pg.image.load("Assets\\Transformations\\UPDRAFT\\Updraft_Sprite(454 x 550).png"),
@@ -282,49 +301,69 @@ while run :
 
 
     ## Game Block :
-    else :
+    elif wlc == 5 :
         screen.blit(img_b2 , (0,0))
-        sprites.draw(screen)
-           
+
+        
+        main_PI_sprite.jump(140, 0.15, 2.6, jumpWay)
+        sprites.widthOffsetCheck()
+        sprites.draw(screen)        
         # Main Sprite Rectangle for HIT-BOX adjustements : 
         pg.draw.rect(screen, colors["GREEN"], main_PI_sprite.getmainhitBox(), width=2)
-        # pg.draw.rect(screen, colors["GREEN"], UPDRAFT_sprite.rect, width=2)
+        pg.draw.rect(screen, colors["GREEN"], UPDRAFT_sprite.rect, width=2)
+
         sprites.update(2, False)
 
-        main_PI_sprite.jump(140, 0.15, 2.6, jumpWay)
+        if trigFlag:
+            ## TrigFlag HitBox :
+            # pg.draw.rect(screen, colors["GREEN"], trigCircle.rect, width=2)
 
-        # Random new wave f screen (proportional to game diff further) :
-        if RND.randint(1,500) == 5 :
-            wv = Wave(*Wave.params_gen(size[0], size[1]))
-            waves.append(wv)
-            waveHeads.append(wv.getheadRect(wv.support()))
-
-        for wave in waves :
-            supp = wave.support()
-            if wave.fin>0 or wave.deb>0 :
-                for center in supp :   
-                    pg.draw.circle(screen,colors["WHITE"],center,RND.uniform(3,15),2)
-                pg.draw.rect(screen, colors["GREEN"], wave.getheadRect(supp), width=2)
-                waveHeads.append(wave.getheadRect(supp))
-            else :
-                score+= 10
-                scoreboard.press()
-                del waves[waves.index(wave)]
-                continue
-            
-            wave.sin_update(5, size[0])
-
-        ## WaveHeads collision check :
-        for heads in waveHeads :
-            if main_PI_sprite.getmainhitBox().colliderect(heads) :
+            trigCircle.move_n_draw(screen, 0.3, 9, 3, 1)
+            pg.draw.rect(screen, colors["GREEN"], trigCircle.rect, width=2)
+            if trigCircle.finished():
+                trigCircle.reset()
                 waves = [Wave(*Wave.params_gen(size[0], size[1]))]
-                score = 0
-                
-                keylocks[pg.MOUSEBUTTONDOWN] = False
-                keylocks[pg.MOUSEBUTTONUP] = False
-                wlc = 3
+                trigFlag = False
+                score+= 50
+                scoreboard.press()
+        else :
 
-        waveHeads = []
+            ## TrigCircle Genreator :
+            if 7 == RND.randint(1, trigDifficulty):
+                wlc = 6
+
+            # Random new wave f screen (proportional to game diff further) :
+            if RND.randint(1,waveDifficulty) == 5 :
+                wv = Wave(*Wave.params_gen(size[0], size[1]))
+                waves.append(wv)
+                waveHeads.append(wv.getheadRect(wv.support()))
+
+            for wave in waves :
+                supp = wave.support()
+                if wave.fin>0 or wave.deb>0 :
+                    for center in supp :   
+                        pg.draw.circle(screen,colors["WHITE"],center,RND.uniform(3,15),2)
+                    pg.draw.rect(screen, colors["GREEN"], wave.getheadRect(supp), width=2)
+                    waveHeads.append(wave.getheadRect(supp))
+                else :
+                    score+= 10
+                    scoreboard.press()
+                    del waves[waves.index(wave)]
+                    continue
+                
+                wave.sin_update(5, size[0])
+
+            ## WaveHeads collision check :
+            for heads in waveHeads :
+                if main_PI_sprite.getmainhitBox().colliderect(heads) :
+                    waves = [Wave(*Wave.params_gen(size[0], size[1]))]
+                    score = 0
+                    
+                    keylocks[pg.MOUSEBUTTONDOWN] = False
+                    keylocks[pg.MOUSEBUTTONUP] = False
+                    wlc = 3
+
+            waveHeads = []
 
         ## Scoreboard management :
         if scoreboard.pressed == True :
@@ -339,7 +378,15 @@ while run :
         screen.blit(stateNull, topleft_center(scoreboard.coord, scoreboard.size))
         for i in range(3) :
             screen.blit(scoreSurfaces[i][digitilizer(score, 3)[i]], topleft_center(scoreboard.coord, scoreboard.size))
-    
+
+    ## Trig Circle Generation:
+    elif wlc == 6 :
+        intro_trigCircle.draw(screen, 2.5, 1)
+        if intro_trigCircle.checkFinish() :
+            intro_trigCircle.reset()
+            wlc, trigFlag = 5, True
+        
+
     pg.display.flip()
     clock.tick(FPS)
 

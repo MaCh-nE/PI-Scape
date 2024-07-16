@@ -1,14 +1,15 @@
 from PIL import Image
 
 # List of image paths
-frames = 95
+frames = 33
 image_paths = []
 
-for i in range(1,frames) :
+## Cross-Sprite framing
+for i in range(0,frames) :
     if i < 10 :
-        image_paths.append("Assets\\Scoreboard\\Intro Animation\\sB0" + str(i) + ".png")
+        image_paths.append("Assets\\Characters\\Pi\\Digitalized_PI\\Digit_PI_Rotation\\Frame_0" + str(i) + ".png")
     else :
-        image_paths.append("Assets\\Scoreboard\\Intro Animation\\sB" + str(i) + ".png")
+        image_paths.append("Assets\\Characters\\Pi\\Digitalized_PI\\Digit_PI_Rotation\\Frame_" + str(i) + ".png")
         
 
 # Open all images and get their sizes
@@ -29,4 +30,4 @@ for image in images:
     x_offset += image.size[1]
 
 # Save the new image
-new_image.save("Scoreboard Intro(1332 x 697).png")
+new_image.save("Digit_Pi_Rotation(538 x 464).png")
