@@ -53,17 +53,23 @@ class Wave :
 
 class SpriteSheet(pg.sprite.Sprite) :
     
-    def __init__(self, sheet, x, y, wid, hei, coeff, total) :
+    def __init__(self, sheet, x, y, wid, hei, coeff, total, randomAssets=0) :
         super().__init__()
         self.sheet = sheet
         self.wid = wid
         self.hei = hei
         self.coeff = coeff
         self.total = total
-        self.animated = True
+
+        ####  For SpriteSheets with random static values to be re-rendered (Digitilazied PI for exemple), it's the totl number
+        #     of these values, concatenated on the top of the actual Sprite frames;
+        self.rndAssets = randomAssets
+        if self.rndAssets!=0 :
+            self.RNDframes = []
+            self.getframes(self.RNDframes, self.rndAssets, 0)
 
         self.frames = []
-        self.getframes()
+        self.getframes(self.frames, self.total, randomAssets)
         self.current = 0
 
         self.inStatic = False
@@ -76,9 +82,12 @@ class SpriteSheet(pg.sprite.Sprite) :
 
         self.hitBox = self.rect
 
+
+
+
     ## Frame by Frame method into the frames list :
-    def getframes(self) :
-        for frame in range(self.total) :
+    def getframes(self, list, total, initialized) :
+        for frame in range(initialized, total + initialized) :
             image = pg.Surface((self.wid, self.hei)).convert_alpha()
 
             ## 3rd .blit() param -> rect of the sheet
@@ -89,8 +98,7 @@ class SpriteSheet(pg.sprite.Sprite) :
 
             ## transparency of the background (ignore black)
             image.set_colorkey((0, 0, 0))
-            self.frames.append(image)
-
+            list.append(image)
     
     def new_RNDxy(self, eps) :
         self.rect.center = [RND.uniform(self.coord[0]-eps, self.coord[0]+eps), RND.uniform(self.coord[1]-eps, self.coord[1]+eps)]
@@ -118,19 +126,28 @@ class SpriteSheet(pg.sprite.Sprite) :
         self.inStatic = True
 
     ## INHERITED !! --> to RE-ASSIGN
-    def update(self, pace, switch_pos) :
-        if self.animated == True :
+    def update(self, pace) :
+        if self.rndAssets == 0:
             if self.current >= self.total - 1 :
                 self.inStatic = True
                 self.current = self.total - 1
             else :
                 self.inStatic = False
                 self.current+= pace
-
             self.image = self.frames[int(self.current)]
+        else :
+            if self.current >= self.total - 1 :
+                self.inStatic = True
+                ## 0.25 so each frame can be rendered 4 times in 60FPS, equivalent to the design wich upholds each digit for 2 frames in 30FPS
+                self.current+= 0.25
+                self.image = self.RNDframes[int(self.current) % self.rndAssets]
+            else :
+                self.inStatic = False
+                self.current+= pace
+                self.image = self.frames[int(self.current)]
 
 
-    ## ONLY FOR THE MAIN SPRITE 
+    ## ONLY FOR THE MAIN SPRITE
     def getmainhitBox(self) :
         return pg.Rect((self.hitBox.topleft[0] + 10, self.hitBox.topleft[1] + 23), (90, 85))
 

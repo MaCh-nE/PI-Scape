@@ -132,7 +132,7 @@ board_swipe = largeSprite(size[0],
 intro_trigCircle = largeSprite(size[0],
                                size[1],
                                (0,0),
-                               54,
+                               67,
                                0,
                                "Assets\\Alerts\\TrigCircle\\In-Sprite\\Frame_",
                                ".png")
@@ -263,7 +263,7 @@ while run :
         if sprites.has(intro_PI_sprite) :
             screen.blit(img_b2 , (0,0))
             sprites.draw(screen)
-            sprites.update(0.2, False)
+            sprites.update(0.2)
             if intro_PI_sprite.inStatic == True :
                 if intro_scoreboard.frame < intro_scoreboard.total :
                     intro_scoreboard.draw(screen, 0.36, 1)
@@ -274,13 +274,22 @@ while run :
                     intro_PI_sprite.reset()
                     sprites.remove(intro_PI_sprite)
 
-                    main_PI_sprite = SpriteSheet(pg.image.load("Assets\\Characters\\Pi\\Main_PI_Rotation\\Main_Sprite(538 x 464).png"),
+                    # main_PI_sprite = SpriteSheet(pg.image.load("Assets\\Characters\\Pi\\Main_PI_Rotation\\Main_PI_Rotation(538 x 464).png"),
+                    #         100,
+                    #         100,
+                    #         538,
+                    #         464,
+                    #         0.3,
+                    #         63)
+
+                    main_PI_sprite = SpriteSheet(pg.image.load("Assets\\Characters\\Pi\\Digitalized_PI\\Digit_PI_Rotation\\SpriteSheet\\Digitalized_PI_Rotation(538 x 464).png"),
                             100,
                             100,
                             538,
                             464,
                             0.3,
-                            63)
+                            63,
+                            12)
 
                     sprites.add(main_PI_sprite)
 
@@ -309,10 +318,10 @@ while run :
         sprites.widthOffsetCheck()
         sprites.draw(screen)        
         # Main Sprite Rectangle for HIT-BOX adjustements : 
-        pg.draw.rect(screen, colors["GREEN"], main_PI_sprite.getmainhitBox(), width=2)
-        pg.draw.rect(screen, colors["GREEN"], UPDRAFT_sprite.rect, width=2)
+        # pg.draw.rect(screen, colors["GREEN"], main_PI_sprite.getmainhitBox(), width=2)
+        # pg.draw.rect(screen, colors["GREEN"], UPDRAFT_sprite.rect, width=2)
 
-        sprites.update(2, False)
+        sprites.update(2)
 
         if trigFlag:
             ## TrigFlag HitBox :
@@ -381,7 +390,7 @@ while run :
 
     ## Trig Circle Generation:
     elif wlc == 6 :
-        intro_trigCircle.draw(screen, 2.5, 1)
+        intro_trigCircle.draw(screen, 3.8, 1)
         if intro_trigCircle.checkFinish() :
             intro_trigCircle.reset()
             wlc, trigFlag = 5, True
