@@ -19,8 +19,8 @@ fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=100)
 # Axis limits
 ax.set_xlim(min(x_data), max(x_data))
 ax.set_ylim(min(y_data), max(y_data))
-ax.axhline(0, color='black',linewidth=2)
-ax.axvline(0, color='black',linewidth=2)
+ax.axhline(0, color='black',linewidth=1)
+ax.axvline(0, color='black',linewidth=1)
 
 # Ticks (Numerical labels)
 ax.xaxis.set_ticks_position('bottom')
@@ -59,7 +59,7 @@ xSqr = [x**2 for x in X]
 
 ## PI-Scape DPI : (43 for X values, 52 for the Y ones)
 
-plt.plot(X, xSqr)
+# plt.plot(X, xSqr)
 
 xSqr = [(x,y) for x,y in zip(X,xSqr)]
 print(xSqr)

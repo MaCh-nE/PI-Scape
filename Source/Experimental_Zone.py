@@ -25,7 +25,7 @@ run = True
 
 
 ## Quadratics :
-xSqr_Px = [(X[0]*43 + (size[0]/2) + 2 , -X[1]*52 + (size[1]/2)) for X in xSqr]
+xSqr_Px = [(X[0]*43 + (size[0]/2) , -X[1]*52 + (size[1]/2)) for X in xSqr]
 
 while run :
     for event in pg.event.get() :
@@ -37,10 +37,6 @@ while run :
 
     pg.draw.lines(screen, (255, 255, 255), False, xSqr_Px, 3)
 
-    mouse_x, mouse_y = pg.mouse.get_pos()
-
-    # Print the mouse coordinates
-    print(f"Mouse position: ({mouse_x}, {mouse_y})")
     pg.display.flip()
     clock.tick(FPS)
 
