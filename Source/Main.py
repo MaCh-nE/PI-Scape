@@ -6,6 +6,7 @@ from time import sleep
 
 ## Parent directory 
 sys.path.append("F:\\PI-Scape\\")
+
 # -------------------------------------------------------------------------------------------------------------------------------------#
 # -------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -274,22 +275,22 @@ while run :
                     intro_PI_sprite.reset()
                     sprites.remove(intro_PI_sprite)
 
-                    # main_PI_sprite = SpriteSheet(pg.image.load("Assets\\Characters\\Pi\\Main_PI_Rotation\\Main_PI_Rotation(538 x 464).png"),
-                    #         100,
-                    #         100,
-                    #         538,
-                    #         464,
-                    #         0.3,
-                    #         63)
-
-                    main_PI_sprite = SpriteSheet(pg.image.load("Assets\\Characters\\Pi\\Digitalized_PI\\Digit_PI_Rotation\\SpriteSheet\\Digitalized_PI_Rotation(538 x 464).png"),
+                    main_PI_sprite = SpriteSheet(pg.image.load("Assets\\Characters\\Pi\\Main_PI_Rotation\\Main_PI_Rotation(538 x 464).png"),
                             100,
                             100,
                             538,
                             464,
                             0.3,
-                            63,
-                            12)
+                            63)
+
+                    # main_PI_sprite = SpriteSheet(pg.image.load("Assets\\Characters\\Pi\\Digitalized_PI\\Digit_PI_Rotation\\SpriteSheet\\Digitalized_PI_Rotation(538 x 464).png"),
+                    #         100,
+                    #         100,
+                    #         538,
+                    #         464,
+                    #         0.3,
+                    #         63,
+                    #         12)
 
                     sprites.add(main_PI_sprite)
 
@@ -312,7 +313,6 @@ while run :
     ## Game Block :
     elif wlc == 5 :
         screen.blit(img_b2 , (0,0))
-
         
         main_PI_sprite.jump(140, 0.15, 2.6, jumpWay)
         sprites.widthOffsetCheck()
@@ -328,7 +328,20 @@ while run :
             # pg.draw.rect(screen, colors["GREEN"], trigCircle.rect, width=2)
 
             trigCircle.move_n_draw(screen, 0.3, 9, 3, 1)
-            pg.draw.rect(screen, colors["GREEN"], trigCircle.rect, width=2)
+            
+            ##########
+
+            # pg.draw.rect(screen, colors["GREEN"], trigCircle.rect, width=2)
+
+            ## Collision Check :
+            if main_PI_sprite.collisionCheck(trigCircle.rect) :
+                waves = [Wave(*Wave.params_gen(size[0], size[1]))]
+                score = 0
+                
+                keylocks[pg.MOUSEBUTTONDOWN] = False
+                keylocks[pg.MOUSEBUTTONUP] = False
+                wlc = 3
+
             if trigCircle.finished():
                 trigCircle.reset()
                 waves = [Wave(*Wave.params_gen(size[0], size[1]))]
@@ -350,10 +363,18 @@ while run :
             for wave in waves :
                 supp = wave.support()
                 if wave.fin>0 or wave.deb>0 :
-                    for center in supp :   
-                        pg.draw.circle(screen,colors["WHITE"],center,RND.uniform(3,15),2)
-                    pg.draw.rect(screen, colors["GREEN"], wave.getheadRect(supp), width=2)
-                    waveHeads.append(wave.getheadRect(supp))
+                    for center in supp :
+                        rad = RND.uniform(3,15)  
+                        pg.draw.circle(screen,colors["WHITE"],center,rad,2)
+                        if main_PI_sprite.collisionCheck(pg.Rect(center[0] - rad, center[1] - rad, rad * 2, rad * 2)) :
+                            waves = [Wave(*Wave.params_gen(size[0], size[1]))]
+                            score = 0
+                            
+                            keylocks[pg.MOUSEBUTTONDOWN] = False
+                            keylocks[pg.MOUSEBUTTONUP] = False
+                            wlc = 3
+                    # pg.draw.rect(screen, colors["GREEN"], wave.getheadRect(supp), width=2)
+                    # waveHeads.append(wave.getheadRect(supp))
                 else :
                     score+= 10
                     scoreboard.press()
@@ -362,17 +383,17 @@ while run :
                 
                 wave.sin_update(5, size[0])
 
-            ## WaveHeads collision check :
-            for heads in waveHeads :
-                if main_PI_sprite.getmainhitBox().colliderect(heads) :
-                    waves = [Wave(*Wave.params_gen(size[0], size[1]))]
-                    score = 0
+            # ## WaveHeads collision check :
+            # for heads in waveHeads :
+            #     if main_PI_sprite.getmainhitBox().colliderect(heads) :
+            #         waves = [Wave(*Wave.params_gen(size[0], size[1]))]
+            #         score = 0
                     
-                    keylocks[pg.MOUSEBUTTONDOWN] = False
-                    keylocks[pg.MOUSEBUTTONUP] = False
-                    wlc = 3
+            #         keylocks[pg.MOUSEBUTTONDOWN] = False
+            #         keylocks[pg.MOUSEBUTTONUP] = False
+            #         wlc = 3
 
-            waveHeads = []
+            # waveHeads = []
 
         ## Scoreboard management :
         if scoreboard.pressed == True :

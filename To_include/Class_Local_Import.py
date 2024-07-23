@@ -151,7 +151,9 @@ class SpriteSheet(pg.sprite.Sprite) :
     def getmainhitBox(self) :
         return pg.Rect((self.hitBox.topleft[0] + 10, self.hitBox.topleft[1] + 23), (90, 85))
 
-    
+    def collisionCheck(self, rect):
+        return self.getmainhitBox().colliderect(rect)
+
 
 # -------------------------------------------------------------------------------------------------------------------------------------#
 # -------------------------------------------------------------------------------------------------------------------------------------#
