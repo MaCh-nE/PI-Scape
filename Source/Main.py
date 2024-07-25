@@ -133,7 +133,7 @@ board_swipe = largeSprite(size[0],
 intro_trigCircle = largeSprite(size[0],
                                size[1],
                                (0,0),
-                               67,
+                               65,
                                0,
                                "Assets\\Alerts\\TrigCircle\\In-Sprite\\Frame_",
                                ".png")
@@ -144,11 +144,10 @@ trigCircle, trigFlag, trigDifficulty = movingSprite(size,
                                               6,
                                               1,
                                               "Assets\\Characters\\TrigCircle\\Main_Sprite\\Frame_",
-                                              ".png"), False, 700
+                                              ".png"), True, 700
 
 # Waves object list (default Wave constructor) (initialized with 1 wave at 1st) :
 waves, waveDifficulty = [Wave(*Wave.params_gen(size[0], size[1]))], 400
-waveHeads = []
 
 # Score :
 score = 0
@@ -318,7 +317,8 @@ while run :
         sprites.widthOffsetCheck()
         sprites.draw(screen)        
         # Main Sprite Rectangle for HIT-BOX adjustements : 
-        # pg.draw.rect(screen, colors["GREEN"], main_PI_sprite.getmainhitBox(), width=2)
+
+        pg.draw.rect(screen, colors["GREEN"], main_PI_sprite.getmainhitBox(), width=2)
         # pg.draw.rect(screen, colors["GREEN"], UPDRAFT_sprite.rect, width=2)
 
         sprites.update(2)
@@ -327,14 +327,15 @@ while run :
             ## TrigFlag HitBox :
             # pg.draw.rect(screen, colors["GREEN"], trigCircle.rect, width=2)
 
-            trigCircle.move_n_draw(screen, 0.3, 9, 3, 1)
-            
+            trigCircle.move_n_draw(screen, 0.3, 1, 3, 1)
+            pg.draw.rect(screen, colors["GREEN"], trigCircle.getmainhitBox(), width=2)
+
             ##########
 
             # pg.draw.rect(screen, colors["GREEN"], trigCircle.rect, width=2)
 
             ## Collision Check :
-            if main_PI_sprite.collisionCheck(trigCircle.rect) :
+            if main_PI_sprite.collisionCheck(trigCircle.getmainhitBox()) :
                 waves = [Wave(*Wave.params_gen(size[0], size[1]))]
                 score = 0
                 
@@ -358,7 +359,6 @@ while run :
             if RND.randint(1,waveDifficulty) == 5 :
                 wv = Wave(*Wave.params_gen(size[0], size[1]))
                 waves.append(wv)
-                waveHeads.append(wv.getheadRect(wv.support()))
 
             for wave in waves :
                 supp = wave.support()
@@ -373,8 +373,6 @@ while run :
                             keylocks[pg.MOUSEBUTTONDOWN] = False
                             keylocks[pg.MOUSEBUTTONUP] = False
                             wlc = 3
-                    # pg.draw.rect(screen, colors["GREEN"], wave.getheadRect(supp), width=2)
-                    # waveHeads.append(wave.getheadRect(supp))
                 else :
                     score+= 10
                     scoreboard.press()
@@ -382,18 +380,6 @@ while run :
                     continue
                 
                 wave.sin_update(5, size[0])
-
-            # ## WaveHeads collision check :
-            # for heads in waveHeads :
-            #     if main_PI_sprite.getmainhitBox().colliderect(heads) :
-            #         waves = [Wave(*Wave.params_gen(size[0], size[1]))]
-            #         score = 0
-                    
-            #         keylocks[pg.MOUSEBUTTONDOWN] = False
-            #         keylocks[pg.MOUSEBUTTONUP] = False
-            #         wlc = 3
-
-            # waveHeads = []
 
         ## Scoreboard management :
         if scoreboard.pressed == True :
@@ -409,7 +395,7 @@ while run :
         for i in range(3) :
             screen.blit(scoreSurfaces[i][digitilizer(score, 3)[i]], topleft_center(scoreboard.coord, scoreboard.size))
 
-    ## Trig Circle Generation:
+    ## Trig Circle Generation :
     elif wlc == 6 :
         intro_trigCircle.draw(screen, 3.8, 1)
         if intro_trigCircle.checkFinish() :

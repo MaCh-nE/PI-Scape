@@ -18,8 +18,6 @@ class Wave :
         self.fin = fin
         self.length = length
 
-        self.head = (self.fin , (self.h) + self.amp*(np.sin(self.freq*self.fin)))
-
     ## Wave updater : -pix_rate pixels from start to finish :
     def sin_update(self, pix_rate, s0) :
         if self.fin > (s0 - self.length) :
@@ -45,8 +43,6 @@ class Wave :
         X = np.linspace(self.fin,self.deb,int(abs(self.deb - self.fin)/4))
         return [(x , (self.h) + self.amp*(np.sin(self.freq*x))) for x in X]
 
-    def getheadRect(self, support) :
-        return pg.Rect((self.head[0] - 10, self.head[1] - 10), (20, 20)) 
 
 # -------------------------------------------------------------------------------------------------------------------------------------#
 # -------------------------------------------------------------------------------------------------------------------------------------#
@@ -78,10 +74,9 @@ class SpriteSheet(pg.sprite.Sprite) :
 
         self.coord = [x,y]
         self.x = self.coord[0]
+
+        self.hitBox = pg.Rect((self.rect.topleft[0] - 20, self.rect.topleft[1] - 20), (90, 85))
         self.rect.center = self.coord
-
-        self.hitBox = self.rect
-
 
 
 
@@ -149,7 +144,7 @@ class SpriteSheet(pg.sprite.Sprite) :
 
     ## ONLY FOR THE MAIN SPRITE
     def getmainhitBox(self) :
-        return pg.Rect((self.hitBox.topleft[0] + 10, self.hitBox.topleft[1] + 23), (90, 85))
+        return self.hitBox
 
     def collisionCheck(self, rect):
         return self.getmainhitBox().colliderect(rect)
@@ -229,9 +224,10 @@ class movingSprite :
         self.coord = [screenSize[0],
                       RND.uniform(3/10,3/5)*screenSize[1]]
         self.rect = pg.transform.scale(pg.image.load(self.path + str(int(self.frame)) + self.ext), self.size).get_rect()
-        self.rect.center = self.coord
 
         self.shakeY = 1
+        self.hitBox = pg.Rect((self.rect.topleft[0] + 50, self.rect.topleft[1]), (420, 430))
+        self.rect.center = self.coord
     
     def move_n_draw(self, surface, transformPace, movePace, shakeCoeff, sign) :
         if int(self.frame) >= self.total + self.fstIndex - 1 :
@@ -240,6 +236,7 @@ class movingSprite :
         self.frame = self.frame + sign*transformPace
         self.coord = [self.coord[0] - sign*movePace, self.coord[1] + self.shakeY*shakeCoeff]
         self.rect.center = self.coord
+        self.hitBox.center = self.coord
         self.shakeY = self.shakeY*(-1)
         
     def reset(self):
@@ -250,6 +247,9 @@ class movingSprite :
 
     def finished(self):
         return self.rect.right <= 0
+    
+    def getmainhitBox(self):
+        return self.hitBox
     
 # -------------------------------------------------------------------------------------------------------------------------------------#
 # -------------------------------------------------------------------------------------------------------------------------------------#
@@ -271,9 +271,9 @@ class customSpriteGroup(pg.sprite.Group):
 
         ## Frame rendering
         if sprite.rect.bottom > self.screenHeight:
-            surface.blit(sprite.image, (sprite.rect.x, sprite.rect.bottom - self.screenHeight))
+            surface.blit(sprite.image, (sprite.rect.x, sprite.rect.bottom - self.screenHeight - 50))
         elif sprite.rect.top < 0:
-            surface.blit(sprite.image, (sprite.rect.x, sprite.rect.top + self.screenHeight))
+            surface.blit(sprite.image, (sprite.rect.x, sprite.rect.top + self.screenHeight + 50))
 
         ## Actual HitBox re-orienting (Rect moving, to not duplicate entities after teleport)      
         if sprite.rect.top > self.screenHeight:
